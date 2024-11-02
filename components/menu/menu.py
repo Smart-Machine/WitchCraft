@@ -1,8 +1,6 @@
 import sys
 import pygame
 
-from game_manager.game_manager import GAME
-
 
 class Menu:
     def __init__(self, manager, settings):
@@ -14,10 +12,12 @@ class Menu:
         )
 
     def mainloop(self):
+        from game_manager.game_manager import GAME
+
         self.settings.screen.fill(self.settings.BLACK)
         self.settings.screen.blit(
             self.title_text,
-            (self.settings.screen_width // 4, self.settings.screen_height // 2),
+            (self.settings.width // 4, self.settings.height // 2),
         )
         pygame.display.update()
 
