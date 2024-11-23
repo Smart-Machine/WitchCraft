@@ -15,8 +15,8 @@ class Settings:
         self,
         width=840,
         height=840,
-        candy_width=32,
-        candy_height=32,
+        candy_width=64,
+        candy_height=64,
         scoreboard_height=50,
     ):
         self.width = width 

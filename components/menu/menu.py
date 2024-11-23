@@ -8,7 +8,7 @@ class Menu:
         self.manager = manager
         self.font = pygame.font.Font(None, 36)
         self.title_text = self.font.render(
-            "Menu - Press Space to Start Game", True, self.settings.WHITE
+            "Press Space to Start Game", True, self.settings.WHITE
         )
 
     def mainloop(self):
@@ -17,7 +17,7 @@ class Menu:
         self.settings.screen.fill(self.settings.BLACK)
         self.settings.screen.blit(
             self.title_text,
-            (self.settings.width // 4, self.settings.height // 2),
+            (self.settings.width // 3, self.settings.height // 2),
         )
         pygame.display.update()
 

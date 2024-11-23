@@ -127,9 +127,11 @@ class Game:
         # set of matching candies
         matches = set()
         for event in pygame.event.get():
+            # detect kill game 
             if event.type == pygame.QUIT:
                 pygame.quit()
                 sys.exit()
+            # detect key press 
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_ESCAPE:
                     self.manager.switch_to(MENU)
@@ -313,10 +315,10 @@ class Game:
                 self.clock.tick(1000)
                 # decrease width and height by 1
                 for candy in matches:
-                    new_width = candy.image.get_width() - 5
-                    new_height = candy.image.get_height() - 5
+                    new_width = max(0, candy.image.get_width() - 5)
+                    new_height = max(0, candy.image.get_height() - 5)
                     new_size = (new_width, new_height)
-                    candy.image = pygame.transform.smoothscale(candy.image, new_size)
+                    candy.image = pygame.transform.scale(candy.image, new_size)
                     candy.rect.left = (
                         candy.col_num * self.settings.candy_width
                         + (self.settings.candy_width - new_width) / 2
