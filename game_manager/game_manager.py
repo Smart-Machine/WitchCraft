@@ -54,6 +54,9 @@ class GameManager:
             self.current_component = component_name
 
     def run(self):
+        pygame.mixer.music.load("game_manager/assets/inspiring_peaceful_fantasy_theme.wav")
+        pygame.mixer.music.set_volume(0.3)
+        pygame.mixer.music.play(-1)
         while True:
             current_component = self.components[self.current_component]
             current_component.mainloop()
