@@ -87,29 +87,34 @@ class Game:
         # add the candy to the set
         matches.add(candy)
 
-        # check the candy above if it"s the same color
-        if candy.row_num > 0:
-            neighbor = self.board.board[candy.row_num - 1][candy.col_num]
-            if candy.color == neighbor.color and neighbor not in matches:
-                matches.update(self.find_matches(neighbor, matches))
+        try:
 
-        # check the candy below if it"s the same color
-        if candy.row_num < self.settings.height / self.settings.candy_height - 1:
-            neighbor = self.board.board[candy.row_num + 1][candy.col_num]
-            if candy.color == neighbor.color and neighbor not in matches:
-                matches.update(self.find_matches(neighbor, matches))
+            # check the candy above if it"s the same color
+            if candy.row_num > 0:
+                neighbor = self.board.board[candy.row_num - 1][candy.col_num]
+                if candy.color == neighbor.color and neighbor not in matches:
+                    matches.update(self.find_matches(neighbor, matches))
 
-        # check the candy to the left if it"s the same color
-        if candy.col_num > 0:
-            neighbor = self.board.board[candy.row_num][candy.col_num - 1]
-            if candy.color == neighbor.color and neighbor not in matches:
-                matches.update(self.find_matches(neighbor, matches))
+            # check the candy below if it"s the same color
+            if candy.row_num < self.settings.height / self.settings.candy_height - 1:
+                neighbor = self.board.board[candy.row_num + 1][candy.col_num]
+                if candy.color == neighbor.color and neighbor not in matches:
+                    matches.update(self.find_matches(neighbor, matches))
 
-        # check the candy to the right if it"s the same color
-        if candy.col_num < self.settings.width / self.settings.candy_width - 1:
-            neighbor = self.board.board[candy.row_num][candy.col_num + 1]
-            if candy.color == neighbor.color and neighbor not in matches:
-                matches.update(self.find_matches(neighbor, matches))
+            # check the candy to the left if it"s the same color
+            if candy.col_num > 0:
+                neighbor = self.board.board[candy.row_num][candy.col_num - 1]
+                if candy.color == neighbor.color and neighbor not in matches:
+                    matches.update(self.find_matches(neighbor, matches))
+
+            # check the candy to the right if it"s the same color
+            if candy.col_num < self.settings.width / self.settings.candy_width - 1:
+                neighbor = self.board.board[candy.row_num][candy.col_num + 1]
+                if candy.color == neighbor.color and neighbor not in matches:
+                    matches.update(self.find_matches(neighbor, matches))
+        
+        except Exception as error:
+            print(f"Error while find matches: {error}")
 
         return matches
 
@@ -166,133 +171,137 @@ class Game:
                 else:
                     direction = "down"
 
-                # if moving left/right, snap the clicked candy to its row position
-                # otherwise, snap it to its col position
-                if direction in ["left", "right"]:
-                    self.clicked_candy.snap_row()
-                else:
-                    self.clicked_candy.snap_col()
+                try:
+                    # if moving left/right, snap the clicked candy to its row position
+                    # otherwise, snap it to its col position
+                    if direction in ["left", "right"]:
+                        self.clicked_candy.snap_row()
+                    else:
+                        self.clicked_candy.snap_col()
 
-                # if moving the clicked candy to the left,
-                # make sureit"s not on the first col
-                if direction == "left" and self.clicked_candy.col_num > 0:
-                    # get the candy to the left
-                    self.swapped_candy = self.board.board[self.clicked_candy.row_num][
-                        self.clicked_candy.col_num - 1
-                    ]
-                    # move the two candies
-                    self.clicked_candy.rect.left = (
-                        self.clicked_candy.col_num * self.settings.candy_width - distance_x
-                    )
-                    self.swapped_candy.rect.left = (
-                        self.swapped_candy.col_num * self.settings.candy_width + distance_x
-                    )
-                    # snap them into their new positions on the board
+                    # if moving the clicked candy to the left,
+                    # make sureit"s not on the first col
+                    if direction == "left" and self.clicked_candy.col_num > 0:
+                        # get the candy to the left
+                        self.swapped_candy = self.board.board[self.clicked_candy.row_num][
+                            self.clicked_candy.col_num - 1
+                        ]
+                        # move the two candies
+                        self.clicked_candy.rect.left = (
+                            self.clicked_candy.col_num * self.settings.candy_width - distance_x
+                        )
+                        self.swapped_candy.rect.left = (
+                            self.swapped_candy.col_num * self.settings.candy_width + distance_x
+                        )
+                        # snap them into their new positions on the board
+                        if (
+                            self.clicked_candy.rect.left
+                            <= self.swapped_candy.col_num * self.settings.candy_width
+                            + self.settings.candy_width / 4
+                        ):
+                            self.swap(self.clicked_candy, self.swapped_candy)
+                            matches.update(self.match_three(self.clicked_candy))
+                            matches.update(self.match_three(self.swapped_candy))
+                            self.moves += 1
+                            self.clicked_candy = None
+                            self.swapped_candy = None
+
+                    # if moving the clicked candy to the right,
+                    # make sure it"s not on the last col
                     if (
-                        self.clicked_candy.rect.left
-                        <= self.swapped_candy.col_num * self.settings.candy_width
-                        + self.settings.candy_width / 4
+                        direction == "right"
+                        and self.clicked_candy.col_num
+                        < self.settings.width / self.settings.candy_width - 1
                     ):
-                        self.swap(self.clicked_candy, self.swapped_candy)
-                        matches.update(self.match_three(self.clicked_candy))
-                        matches.update(self.match_three(self.swapped_candy))
-                        self.moves += 1
-                        self.clicked_candy = None
-                        self.swapped_candy = None
+                        # get the candy to the right
+                        self.swapped_candy = self.board.board[self.clicked_candy.row_num][
+                            self.clicked_candy.col_num + 1
+                        ]
 
-                # if moving the clicked candy to the right,
-                # make sure it"s not on the last col
-                if (
-                    direction == "right"
-                    and self.clicked_candy.col_num
-                    < self.settings.width / self.settings.candy_width - 1
-                ):
-                    # get the candy to the right
-                    self.swapped_candy = self.board.board[self.clicked_candy.row_num][
-                        self.clicked_candy.col_num + 1
-                    ]
+                        # move the two candies
+                        self.clicked_candy.rect.left = (
+                            self.clicked_candy.col_num * self.settings.candy_width + distance_x
+                        )
+                        self.swapped_candy.rect.left = (
+                            self.swapped_candy.col_num * self.settings.candy_width - distance_x
+                        )
 
-                    # move the two candies
-                    self.clicked_candy.rect.left = (
-                        self.clicked_candy.col_num * self.settings.candy_width + distance_x
-                    )
-                    self.swapped_candy.rect.left = (
-                        self.swapped_candy.col_num * self.settings.candy_width - distance_x
-                    )
+                        # snap them into their new positions on the board
+                        if (
+                            self.clicked_candy.rect.left
+                            >= self.swapped_candy.col_num * self.settings.candy_width
+                            - self.settings.candy_width / 4
+                        ):
+                            self.swap(self.clicked_candy, self.swapped_candy)
+                            matches.update(self.match_three(self.clicked_candy))
+                            matches.update(self.match_three(self.swapped_candy))
+                            self.moves += 1
+                            self.clicked_candy = None
+                            self.swapped_candy = None
 
-                    # snap them into their new positions on the board
+                    # if moving the clicked candy up,
+                    # make sure it"s not on the first row
+                    if direction == "up" and self.clicked_candy.row_num > 0:
+                        # get the candy above
+                        self.swapped_candy = self.board.board[self.clicked_candy.row_num - 1][
+                            self.clicked_candy.col_num
+                        ]
+                        # move the two candies
+                        self.clicked_candy.rect.top = (
+                            self.clicked_candy.row_num * self.settings.candy_height - distance_y
+                        )
+                        self.swapped_candy.rect.top = (
+                            self.swapped_candy.row_num * self.settings.candy_height + distance_y
+                        )
+
+                        # snap them into their new positions on the board
+                        if (
+                            self.clicked_candy.rect.top
+                            <= self.swapped_candy.row_num * self.settings.candy_height
+                            + self.settings.candy_height / 4
+                        ):
+                            self.swap(self.clicked_candy, self.swapped_candy)
+                            matches.update(self.match_three(self.clicked_candy))
+                            matches.update(self.match_three(self.swapped_candy))
+                            self.moves += 1
+                            self.clicked_candy = None
+                            self.swapped_candy = None
+
+                    # if moving the clicked candy down,
+                    # make sure it"s not on the last row
                     if (
-                        self.clicked_candy.rect.left
-                        >= self.swapped_candy.col_num * self.settings.candy_width
-                        - self.settings.candy_width / 4
+                        direction == "down"
+                        and self.clicked_candy.row_num
+                        < self.settings.height / self.settings.candy_height - 1
                     ):
-                        self.swap(self.clicked_candy, self.swapped_candy)
-                        matches.update(self.match_three(self.clicked_candy))
-                        matches.update(self.match_three(self.swapped_candy))
-                        self.moves += 1
-                        self.clicked_candy = None
-                        self.swapped_candy = None
+                        # get the candy below
+                        self.swapped_candy = self.board.board[self.clicked_candy.row_num + 1][
+                            self.clicked_candy.col_num
+                        ]
 
-                # if moving the clicked candy up,
-                # make sure it"s not on the first row
-                if direction == "up" and self.clicked_candy.row_num > 0:
-                    # get the candy above
-                    self.swapped_candy = self.board.board[self.clicked_candy.row_num - 1][
-                        self.clicked_candy.col_num
-                    ]
-                    # move the two candies
-                    self.clicked_candy.rect.top = (
-                        self.clicked_candy.row_num * self.settings.candy_height - distance_y
-                    )
-                    self.swapped_candy.rect.top = (
-                        self.swapped_candy.row_num * self.settings.candy_height + distance_y
-                    )
+                        # move the two candies
+                        self.clicked_candy.rect.top = (
+                            self.clicked_candy.row_num * self.settings.candy_height + distance_y
+                        )
+                        self.swapped_candy.rect.top = (
+                            self.swapped_candy.row_num * self.settings.candy_height - distance_y
+                        )
 
-                    # snap them into their new positions on the board
-                    if (
-                        self.clicked_candy.rect.top
-                        <= self.swapped_candy.row_num * self.settings.candy_height
-                        + self.settings.candy_height / 4
-                    ):
-                        self.swap(self.clicked_candy, self.swapped_candy)
-                        matches.update(self.match_three(self.clicked_candy))
-                        matches.update(self.match_three(self.swapped_candy))
-                        self.moves += 1
-                        self.clicked_candy = None
-                        self.swapped_candy = None
+                        # snap them into their new positions on the board
+                        if (
+                            self.clicked_candy.rect.top
+                            >= self.swapped_candy.row_num * self.settings.candy_height
+                            - self.settings.candy_height / 4
+                        ):
+                            self.swap(self.clicked_candy, self.swapped_candy)
+                            matches.update(self.match_three(self.clicked_candy))
+                            matches.update(self.match_three(self.swapped_candy))
+                            self.moves += 1
+                            self.clicked_candy = None
+                            self.swapped_candy = None
 
-                # if moving the clicked candy down,
-                # make sure it"s not on the last row
-                if (
-                    direction == "down"
-                    and self.clicked_candy.row_num
-                    < self.settings.height / self.settings.candy_height - 1
-                ):
-                    # get the candy below
-                    self.swapped_candy = self.board.board[self.clicked_candy.row_num + 1][
-                        self.clicked_candy.col_num
-                    ]
-
-                    # move the two candies
-                    self.clicked_candy.rect.top = (
-                        self.clicked_candy.row_num * self.settings.candy_height + distance_y
-                    )
-                    self.swapped_candy.rect.top = (
-                        self.swapped_candy.row_num * self.settings.candy_height - distance_y
-                    )
-
-                    # snap them into their new positions on the board
-                    if (
-                        self.clicked_candy.rect.top
-                        >= self.swapped_candy.row_num * self.settings.candy_height
-                        - self.settings.candy_height / 4
-                    ):
-                        self.swap(self.clicked_candy, self.swapped_candy)
-                        matches.update(self.match_three(self.clicked_candy))
-                        matches.update(self.match_three(self.swapped_candy))
-                        self.moves += 1
-                        self.clicked_candy = None
-                        self.swapped_candy = None
+                except Exception as error:
+                    print(f"Unhandled error: {error}")
 
             # detect mouse release
             if self.clicked_candy is not None and event.type == pygame.MOUSEBUTTONUP:

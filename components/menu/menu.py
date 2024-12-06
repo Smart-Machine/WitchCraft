@@ -12,7 +12,7 @@ class Menu:
         )
 
     def mainloop(self):
-        from game_manager.game_manager import GAME
+        from game_manager.game_manager import CUTSCENE_ONE
 
         self.settings.screen.fill(self.settings.BLACK)
         self.settings.screen.blit(
@@ -27,4 +27,4 @@ class Menu:
                 sys.exit()
             elif event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_SPACE:
-                    self.manager.switch_to(GAME)
+                    self.manager.switch_to(CUTSCENE_ONE)
